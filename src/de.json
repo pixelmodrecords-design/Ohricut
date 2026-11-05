@@ -1,0 +1,147 @@
+{
+  "status": {
+    "ready": "Bereit",
+    "job_running": "Es läuft bereits ein Auftrag.",
+    "error": "Fehler: {ex}",
+    "list_cleared": "Liste geleert",
+    "processing_started": "Verarbeitung gestartet …",
+    "processing_done_slices": "Verarbeitung abgeschlossen: {slices} Slices in RESULTS/{ordner}",
+    "track_created": "Track erstellt: {dateiname}",
+    "move_cancelled": "Verschieben abgebrochen.",
+    "select_slice_first": "Wähle zuerst einen Slice aus.",
+    "tap_target_category": "Tippe auf eine Zielkategorie.",
+    "moved_to": "Nach {kat} verschoben.",
+    "sample_deleted": "Sample „{name}“ gelöscht!",
+    "added_to_selection": "„{name}“ zur Generator-Auswahl hinzugefügt.",
+    "removed_from_selection": "Aus Generator-Auswahl entfernt.",
+    "generation_started": "Beat-Generierung gestartet …",
+    "slice_moved_to_pool": "Slice nach POOL/{kat}/ verschoben!"
+  },
+  "ui": {
+    "report_title": "BERICHT",
+    "autoplay_on": "Autoplay: EIN",
+    "autoplay_off": "Autoplay: AUS",
+    "language_switch": "Sprache: DE",
+    "places": {
+      "App": "App",
+      "Download": "Download",
+      "Musik": "Musik",
+      "Speicher": "Speicher"
+    },
+    "cut": {
+      "initial_report": "Wähle eine WAV-Datei aus und tippe auf „Verarbeiten“.",
+      "btn_process": "VERARBEITEN",
+      "candidates_title": "Verfügbare Slices ({ordner} – {n}):",
+      "nothing_processed_yet": "Noch nichts verarbeitet.",
+      "no_slices_initial": "Keine Slices verfügbar. Verarbeite zuerst eine WAV-Datei.",
+      "no_slices_folder": "Keine Slices in diesem Ordner.",
+      "btn_clear_list": "Liste leeren",
+      "selected_file_report": "Ausgewählt: {ziel}\nTippe auf „Verarbeiten“, um zu starten.",
+      "cleared_report": "Liste geleert. Wähle eine WAV-Datei aus und tippe auf „Verarbeiten“.",
+      "processing_report": "Wird verarbeitet: {wav}\nBitte warten …",
+      "processing_done_report": "Verarbeitung abgeschlossen! Ordner: {ordner}\nTempo: {bpm} BPM | Versatz: {versatz} ms\nSlices: {slices} | Leer/Stille: {leer}\nSlices nach Kategorie: M:{m} P:{p} V:{v}",
+      "processing_aborted_report": "Verarbeitung abgebrochen. Weitere Informationen stehen im Statusbereich."
+    },
+    "pool": {
+      "tab_library": "1. Sample-Bibliothek (LIBRARY)",
+      "tab_generator": "2. Generator-Pool",
+      "library_content_title": "Samples in „{kat}“ ({n} Dateien):",
+      "btn_add_to_selection": "Zur Generator-Auswahl hinzufügen",
+      "btn_delete": "Aus Pool-Auswahl löschen",
+      "active_generator_samples_title": "Aktive Samples im Generator-Pool ({n}):",
+      "btn_remove_from_selection": "Aus Generator-Auswahl entfernen",
+      "empty_slot": "Leer",
+      "btn_move": "MOVE"
+    },
+    "generate": {
+      "title": "BEAT-GENERATOR",
+      "drum_mode": "Drum-Modus:",
+      "mood": "Stimmung:",
+      "mood_names": {
+        "Energetisch": "Energetisch",
+        "Entspannt": "Entspannt",
+        "Minimal": "Minimal"
+      },
+      "bpm_bars_title": "BPM ({bpm}) & Takte ({takte}):",
+      "bars_format": "{takte} Takte",
+      "sidechain": "Sidechain-Ducking:",
+      "bass_synth_section": "Bass-Synthesizer & Samples:",
+      "bass_synth_on": "Bass-Synth: EIN",
+      "bass_synth_off": "Bass-Synth: AUS",
+      "root_note_format": "Grundton: {ton}",
+      "mode_format": "Modus: {modus}",
+      "modes": {
+        "Dur": "Dur",
+        "Moll": "Moll"
+      },
+      "bass_sound_type": "Bass-Synth-Klangart:",
+      "bass_sounds": {
+        "saegeszahn": "Sägezahn",
+        "saettigung": "Sättigung",
+        "slap": "Slap",
+        "flaechig": "Pad"
+      },
+      "transitions_fills": "Übergänge & Fills:",
+      "transition_melody_on": "Melodie-Übergänge: EIN",
+      "transition_melody_off": "Melodie-Übergänge: AUS",
+      "transition_drums_on": "Drum-Fills: EIN",
+      "transition_drums_off": "Drum-Fills: AUS",
+      "variation_controls": "Variationsregler (0–5):",
+      "voice_variation": "Voice-Variation",
+      "melodie_variation": "Melodievariation",
+      "btn_generate": "BEAT GENERIEREN (aus POOL/)"
+    }
+  },
+  "pipeline": {
+    "wav_format_not_supported": "WAV-Format wird nicht unterstützt.",
+    "searching_silence": "Suche nach Stille …",
+    "searching_vocals": "Suche nach Gesangsphrasen …",
+    "estimating_tempo": "Tempo wird ermittelt …",
+    "tempo_offset_slicing": "{bpm:.1f} BPM, Versatz: {versatz} ms. Schneide …",
+    "slices_analyzed": "{i}/{n} Slices analysiert",
+    "analyzing_slices": "Analysiere {k} Slices …"
+  },
+  "logic": {
+    "voice_min_duration": "VOICE-Samples müssen mindestens {min_s} s lang sein ({dauer:.2f} s)",
+    "invalid_category": "Ungültige Kategorie: {kat}",
+    "sample_already_in_category": "Sample befindet sich bereits in {kat}.",
+    "file_not_in_library": "Datei befindet sich nicht in der LIBRARY.",
+    "category_full": "{kat} ist voll ({plaetze}/{plaetze})",
+    "already_in_selection": "Bereits in der Auswahl.",
+    "not_in_selection": "Nicht in der Auswahl.",
+    "unknown_mood": "Unbekannte Stimmung: '{stimmung}'",
+    "invalid_bpm": "BPM muss eine ganze Zahl zwischen 40 und 240 sein.",
+    "invalid_bars": "Die Taktanzahl muss eine ganze Zahl zwischen 8 und 256 sein.",
+    "track_duration_exceeded": "Tracklänge ({dauer:.0f} s) überschreitet das Maximum von {max_s} s. Verwende weniger Takte oder erhöhe das BPM.",
+    "at_least_one_drum": "Wähle mindestens ein Drum-Sample aus.",
+    "unknown_category": "Unbekannte Kategorie: {kat}",
+    "invalid_entry": "Ungültiger Eintrag: {rel}",
+    "load_settings_failed": "Fehler beim Laden der Einstellungen: {ex}",
+    "save_settings_failed": "Fehler beim Speichern der Einstellungen: {ex}",
+    "write_cache_failed": "Fehler beim Schreiben des Pool-Cache: {ex}",
+    "analyze_sample_failed": "Fehler beim Analysieren von Pool-Sample {dateiname}: {ex}"
+  },
+  "cli": {
+    "specify_wav": "Fehler: Bitte eine WAV-Datei angeben.",
+    "file_not_found": "Fehler: Datei '{pfad}' nicht gefunden.",
+    "processing_complete": "Verarbeitung erfolgreich abgeschlossen:",
+    "processing_failed": "Verarbeitung fehlgeschlagen: {ex}",
+    "invalid_bars_bpm": "Fehler: Taktanzahl und BPM müssen ganze Zahlen sein. Beispiel: generiere Dynamik 32 125",
+    "generating_track": "Track wird generiert ({takte} Takte, {bpm} BPM, Stimmung: {stimmung})...",
+    "invalid_input": "Ungültige Eingabe: {ex}",
+    "generation_failed": "Track-Generierung fehlgeschlagen: {ex}",
+    "track_generated": "Track erfolgreich generiert: {pfad}",
+    "unknown_command": "Unbekannter Befehl: {cmd}",
+    "preview_error": "Vorhör-Fehler: {ex}",
+    "mixer_init_warning": "Mixer Init Warnung: {ex}",
+    "key_detection_failed": "Tonart-Messung fehlgeschlagen: {ex}",
+    "details": {
+      "folder": "Ordner",
+      "bpm": "BPM",
+      "offset": "Versatz",
+      "slices": "Slices",
+      "empty": "Leer"
+    },
+    "help": "\n========================================================================\n                       OHRICUT - Hilfe & Anleitung\n========================================================================\n\nOHRICUT ist ein Werkzeug zum schnellen Erstellen von Beats und Loops aus\neigenem Audiomaterial.\n\n1. GRAPHISCHE OBERFLÄCHE (GUI)\n------------------------------------------------------------------------\nAufruf ohne Argumente:\n  python3 ohricut_app.py\n\nDie Oberfläche gliedert sich in drei Reiter:\n  - CUT:      WAV-Datei auswählen, auf Stille & Tempo untersuchen,\n              auf Raster schneiden. In der unteren Hälfte werden alle\n              Slices mit detaillierten Eigenschaften angezeigt.\n  - POOL:     Slices vorhören und gezielt per Hand freigeben (verschieben)\n              in die POOL-Ordner. Enthält eine Detailansicht aller Samples,\n              die in den Generator geladen werden.\n  - GENERATE: Beats aus dem freigegebenen POOL erzeugen.\n              Output in GENERATED_MUSIC/.\n  - Einstellungen (Drum-Modus, Sidechain, Bass, Übergänge, Variationen) liegen unter GENERATE.\n\n2. KOMMANDOZEILE (CLI)\n------------------------------------------------------------------------\n- Hilfe anzeigen:\n    python3 ohricut_app.py help (oder: hilfe, --help)\n\n- Datei verarbeiten (CUT-Schritt):\n    python3 ohricut_app.py process /pfad/zur/datei.wav (oder: verarbeite)\n\n- Track generieren (GENERATE-Schritt):\n    python3 ohricut_app.py generate <Modus> [takte] [bpm] [stimmung] (oder: generiere)\n========================================================================\n"
+  }
+}

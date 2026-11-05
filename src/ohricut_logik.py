@@ -11,17 +11,25 @@ import math
 import uuid
 import numpy as np
 
-import ohricut_kern as kern
+try:
+    from src import ohricut_kern as kern
+    from src import ohricut_i18n as i18n
+except ImportError:
+    import ohricut_kern as kern
+    import ohricut_i18n as i18n
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-RESULTS_DIR = os.path.join(SCRIPT_DIR, "RESULTS")
-POOL_DIR = os.path.join(SCRIPT_DIR, "POOL")
-OUT_DIR = os.path.join(SCRIPT_DIR, "GENERATED_MUSIC")
-EINSTELLUNGEN_PFAD = os.path.join(SCRIPT_DIR, "ohricut_einstellungen.json")
+# Das Stammverzeichnis (Projekt-Root) liegt über src/
+SRC_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SRC_DIR)
+RESULTS_DIR = os.path.join(PROJECT_ROOT, "RESULTS")
+POOL_DIR = os.path.join(PROJECT_ROOT, "POOL")
+OUT_DIR = os.path.join(PROJECT_ROOT, "GENERATED_MUSIC")
+EINSTELLUNGEN_PFAD = os.path.join(PROJECT_ROOT, "ohricut_einstellungen.json")
 CACHE_PFAD = os.path.join(POOL_DIR, "pool_cache.json")
-AUSWAHL_PFAD = os.path.join(SCRIPT_DIR, "auswahl_generator.json")
+AUSWAHL_PFAD = os.path.join(PROJECT_ROOT, "auswahl_generator.json")
 
 STANDARD_EINSTELLUNGEN = {
+    "sprache": "en",                    # de / en
     "drum_modus": "break",              # straight / break / shuffle
     "sidechain": "mid",                 # soft (-1.5dB) / mid (-3.0dB) / hard (-6.0dB)
     "bass_synth": True,
@@ -48,7 +56,7 @@ def lade_einstellungen():
                 daten = json.load(fh)
                 einstellungen.update({k: v for k, v in daten.items() if k in STANDARD_EINSTELLUNGEN})
         except Exception as ex:
-            print(f"Fehler beim Laden der Einstellungen: {ex}")
+            print(i18n.t("logic.load_settings_failed", ex=ex))
     return einstellungen
 
 
@@ -57,7 +65,7 @@ def speichere_einstellungen(einstellungen):
         with open(EINSTELLUNGEN_PFAD, "w", encoding="utf-8") as fh:
             json.dump(einstellungen, fh, ensure_ascii=False, indent=2)
     except Exception as ex:
-        print(f"Fehler beim Speichern der Einstellungen: {ex}")
+        print(i18n.t("logic.save_settings_failed", ex=ex))
 
 
 # ============ Pool-Verwaltung & Cache ============
@@ -91,7 +99,7 @@ def _schreibe_cache(cache):
             json.dump(cache, fh, ensure_ascii=False, indent=1)
         os.replace(tmp, CACHE_PFAD)
     except Exception as ex:
-        print(f"Fehler beim Schreiben des Pool-Cache: {ex}")
+        print(i18n.t("logic.write_cache_failed", ex=ex))
 
 
 def _analysiere_pool_datei(kat, dateiname):
@@ -105,7 +113,7 @@ def _analysiere_pool_datei(kat, dateiname):
         feats["rel_pfad"] = os.path.join(kat, dateiname)
         return feats
     except Exception as ex:
-        print(f"Fehler beim Analysieren von Pool-Sample {dateiname}: {ex}")
+        print(i18n.t("logic.analyze_sample_failed", dateiname=dateiname, ex=ex))
         return None
 
 
@@ -171,13 +179,13 @@ def _pruefe_voice_dauer(pfad, kategorie):
         return
     dauer = _wav_dauer(pfad)
     if dauer is not None and dauer < VOICE_MIN_S:
-        raise ValueError(f"VOICE unter {VOICE_MIN_S} s nicht erlaubt ({dauer:.2f} s)")
+        raise ValueError(i18n.t("logic.voice_min_duration", min_s=VOICE_MIN_S, dauer=dauer))
 
 
 def freigeben_in_pool(quelle_pfad, ziel_kategorie):
     """Verschiebt ein Sample von RESULTS in den Pool und aktualisiert nur diesen Eintrag."""
     if ziel_kategorie not in kern.POOL_KATS:
-        raise ValueError(f"Ungültige Kategorie: {ziel_kategorie}")
+        raise ValueError(i18n.t("logic.invalid_category", kat=ziel_kategorie))
     _pruefe_voice_dauer(quelle_pfad, ziel_kategorie)
 
     init_pool_struktur()
@@ -199,12 +207,12 @@ def verschiebe_in_pool(rel, ziel_kategorie):
     """Verschiebt ein Pool-Sample in eine andere Kategorie. Die Auswahl bleibt erhalten, der Pfad wird angepasst."""
     alt_kat = _kat_aus_rel(rel)
     if ziel_kategorie not in kern.POOL_KATS:
-        raise ValueError(f"Ungültige Kategorie: {ziel_kategorie}")
+        raise ValueError(i18n.t("logic.invalid_category", kat=ziel_kategorie))
     if alt_kat == ziel_kategorie:
-        raise ValueError(f"Das Sample liegt schon in {ziel_kategorie}")
+        raise ValueError(i18n.t("logic.sample_already_in_category", kat=ziel_kategorie))
     quelle = os.path.join(POOL_DIR, rel)
     if not os.path.isfile(quelle):
-        raise ValueError("Datei ist nicht in der LIBRARY")
+        raise ValueError(i18n.t("logic.file_not_in_library"))
     _pruefe_voice_dauer(quelle, ziel_kategorie)
 
     init_pool_struktur()
@@ -217,7 +225,7 @@ def verschiebe_in_pool(rel, ziel_kategorie):
         ziel_pfad = os.path.join(ziel_dir, dateiname)
     auswahl = lade_auswahl()          # vor dem Verschieben, sonst fallen Einträge ohne Datei weg
     if rel in auswahl[alt_kat] and ziel_kategorie in DRUM_KATS and len(auswahl[ziel_kategorie]) >= DRUM_PLAETZE:
-        raise ValueError(f"{ziel_kategorie} ist voll ({DRUM_PLAETZE}/{DRUM_PLAETZE})")
+        raise ValueError(i18n.t("logic.category_full", kat=ziel_kategorie, plaetze=DRUM_PLAETZE))
     shutil.move(quelle, ziel_pfad)
 
     neu_rel = f"{ziel_kategorie}/{dateiname}"
@@ -287,23 +295,23 @@ def lade_auswahl():
 def _kat_aus_rel(rel):
     """Kategorie aus einem Pfad wie 'KICK/s0001.wav'. Ungueltige Pfade werfen ValueError."""
     if not isinstance(rel, str) or "/" not in rel:
-        raise ValueError(f"Ungültiger Eintrag: {rel}")
+        raise ValueError(i18n.t("logic.invalid_entry", rel=rel))
     kat = rel.split("/", 1)[0]
     if kat not in kern.POOL_KATS:
-        raise ValueError(f"Unbekannte Kategorie: {kat}")
+        raise ValueError(i18n.t("logic.unknown_category", kat=kat))
     return kat
 
 
 def auswahl_hinzufuegen(rel):
     kat = _kat_aus_rel(rel)
     if not os.path.isfile(os.path.join(POOL_DIR, rel)):
-        raise ValueError("Datei ist nicht in der LIBRARY")
+        raise ValueError(i18n.t("logic.file_not_in_library"))
     _pruefe_voice_dauer(os.path.join(POOL_DIR, rel), kat)
     auswahl = lade_auswahl()
     if rel in auswahl[kat]:
-        raise ValueError("Schon in der Auswahl")
+        raise ValueError(i18n.t("logic.already_in_selection"))
     if kat in DRUM_KATS and len(auswahl[kat]) >= DRUM_PLAETZE:
-        raise ValueError(f"{kat} ist voll ({DRUM_PLAETZE}/{DRUM_PLAETZE})")
+        raise ValueError(i18n.t("logic.category_full", kat=kat, plaetze=DRUM_PLAETZE))
     auswahl[kat].append(rel)
     _schreibe_auswahl(auswahl)
     return auswahl
@@ -313,7 +321,7 @@ def auswahl_entfernen(rel):
     kat = _kat_aus_rel(rel)
     auswahl = lade_auswahl()
     if rel not in auswahl[kat]:
-        raise ValueError("Nicht in der Auswahl")
+        raise ValueError(i18n.t("logic.not_in_selection"))
     auswahl[kat].remove(rel)
     _schreibe_auswahl(auswahl)
     return auswahl
@@ -336,6 +344,13 @@ GRUNDTON_BASIS_HZ = 32.70        # C1, Basis für die Grundnote
 TONART_SICHER_MIN = 60.0
 STANDARD_OPTIONEN = {"transposition": False, "bass_verlauf": True}
 STIMMUNGEN_GEN = ("Energetisch", "Entspannt", "Minimal")
+STIMMUNGEN_MAPPING = {
+    "energetisch": "Energetisch",
+    "energetic": "Energetisch",
+    "entspannt": "Entspannt",
+    "relaxed": "Entspannt",
+    "minimal": "Minimal"
+}
 MAX_DAUER_S = 300
 
 # "T" = Terz: 4 Halbtöne in Dur, 3 in Moll
@@ -887,22 +902,24 @@ def hat_drum_sample(pools):
 def generiere_track(bpm=125, takte=32, stimmung="Entspannt", optionen=None):
     """Erzeugt einen Track aus der Auswahl (POOL, Abschnitt 2). Gibt den Dateipfad zurueck.
     optionen: dict mit transposition und bass_verlauf (Standard: bass_verlauf an, Transposition aus)."""
-    if stimmung not in STIMMUNGEN_GEN:
-        raise ValueError(f"Unbekannte Stimmung '{stimmung}'")
+    norm_stimmung = STIMMUNGEN_MAPPING.get(str(stimmung).strip().lower())
+    if not norm_stimmung:
+        raise ValueError(i18n.t("logic.unknown_mood", stimmung=stimmung))
+    stimmung = norm_stimmung
     if not isinstance(bpm, int) or not 40 <= bpm <= 240:
-        raise ValueError("BPM muss eine ganze Zahl zwischen 40 und 240 sein")
+        raise ValueError(i18n.t("logic.invalid_bpm"))
     if not isinstance(takte, int) or not 8 <= takte <= 256:
-        raise ValueError("Takte muss eine ganze Zahl zwischen 8 und 256 sein")
+        raise ValueError(i18n.t("logic.invalid_bars"))
     dauer = takte * 4 * 60.0 / bpm
     if dauer > MAX_DAUER_S:
-        raise ValueError(f"Tracklänge {dauer:.0f} s überschreitet {MAX_DAUER_S} s. Weniger Takte oder höheres BPM wählen.")
+        raise ValueError(i18n.t("logic.track_duration_exceeded", dauer=dauer, max_s=MAX_DAUER_S))
 
     opt = dict(STANDARD_OPTIONEN)
     opt.update(optionen or {})
     einst = lade_einstellungen()
     pools = lade_auswahl_pools(bpm)
     if not hat_drum_sample(pools):
-        raise ValueError("Mindestens ein Drum-Sample in der Auswahl")
+        raise ValueError(i18n.t("logic.at_least_one_drum"))
 
     rnd = random.Random(random.randrange(1, 1000000))
     mix = _sequenz(pools, rnd, einst, takte, bpm, stimmung, opt)
