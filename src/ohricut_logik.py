@@ -56,7 +56,7 @@ def lade_einstellungen():
                 daten = json.load(fh)
                 einstellungen.update({k: v for k, v in daten.items() if k in STANDARD_EINSTELLUNGEN})
         except Exception as ex:
-            print(f"Fehler beim Laden der Einstellungen: {ex}")
+            print(i18n.t("logic.load_settings_failed", ex=ex))
     return einstellungen
 
 
@@ -65,7 +65,7 @@ def speichere_einstellungen(einstellungen):
         with open(EINSTELLUNGEN_PFAD, "w", encoding="utf-8") as fh:
             json.dump(einstellungen, fh, ensure_ascii=False, indent=2)
     except Exception as ex:
-        print(f"Fehler beim Speichern der Einstellungen: {ex}")
+        print(i18n.t("logic.save_settings_failed", ex=ex))
 
 
 # ============ Pool-Verwaltung & Cache ============
@@ -99,7 +99,7 @@ def _schreibe_cache(cache):
             json.dump(cache, fh, ensure_ascii=False, indent=1)
         os.replace(tmp, CACHE_PFAD)
     except Exception as ex:
-        print(f"Fehler beim Schreiben des Pool-Cache: {ex}")
+        print(i18n.t("logic.write_cache_failed", ex=ex))
 
 
 def _analysiere_pool_datei(kat, dateiname):
@@ -113,7 +113,7 @@ def _analysiere_pool_datei(kat, dateiname):
         feats["rel_pfad"] = os.path.join(kat, dateiname)
         return feats
     except Exception as ex:
-        print(f"Fehler beim Analysieren von Pool-Sample {dateiname}: {ex}")
+        print(i18n.t("logic.analyze_sample_failed", dateiname=dateiname, ex=ex))
         return None
 
 

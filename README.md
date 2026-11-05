@@ -2,11 +2,21 @@
 
 OHRICUT ist ein Python-Werkzeug zum Erstellen von Beats und Loops aus eigenem WAV-Audiomaterial. Die Anwendung verbindet eine Sample-Aufbereitungs-Pipeline mit einer manuellen Sample-Bibliothek und einem regelbasierten Beat-Generator.
 
-Die Anwendung ist in drei Python-Module aufgeteilt:
+Die Anwendung gliedert sich in folgende Module und Komponenten:
 
-- `ohricut_app.py` – grafische Oberfläche (Pygame) und Kommandozeile
-- `ohricut_kern.py` – WAV-I/O, Audioanalyse, Slice-Erstellung und Signalverarbeitung
-- `ohricut_logik.py` – Sample-Pool, Auswahl, Cache, Einstellungen und Musikgenerierung
+- `ohricut_app.py` – grafische Benutzeroberfläche (Pygame) und Kommandozeile (CLI) im Stammverzeichnis
+- `src/ohricut_kern.py` – WAV-I/O, Audioanalyse, Slice-Erstellung und Signalverarbeitung
+- `src/ohricut_logik.py` – Sample-Pool, Auswahl, Cache, Einstellungen und Musikgenerierung
+- `src/ohricut_i18n.py` – Zentrale Sprachverwaltung (Internationalisierung / I18n)
+- `src/de.json` & `src/en.json` – Sprachdateien für Deutsch und Englisch
+
+## Zweisprachigkeit (Deutsch / Englisch)
+
+OHRICUT ist vollständig zweisprachig:
+- **Standardsprache:** Englisch (`en`) bei Erststart bzw. Neuinstallation.
+- **Sprachumschalter:** Direkt in der GUI-Kopfzeile (`Language: EN` / `Sprache: DE`) mit sofortiger Umschaltung zur Laufzeit.
+- **Persistierung:** Die gewählte Sprache wird dauerhaft in `ohricut_einstellungen.json` gespeichert.
+- **CLI & Stimmungen:** Die Kommandozeile spricht primär Englisch (`process`, `generate`, `help`) und unterstützt weiterhin alle deutschen Alias-Befehle (`verarbeite`, `generiere`, `hilfe`) sowie deutsche und englische Stimmungsbezeichnungen (`Energetic` / `Energetisch`, `Relaxed` / `Entspannt`, `Minimal`).
 
 ## Funktionen
 
@@ -72,13 +82,14 @@ Die Oberfläche enthält die drei Bereiche CUT, POOL und GENERATE.
 ### Hilfe anzeigen
 
 ```bash
-python ohricut_app.py hilfe
+python ohricut_app.py help
 ```
 
 Alternativ:
 
 ```bash
-python ohricut_app.py --help
+python ohricut_app.py hilfe
+# oder: python ohricut_app.py --help
 ```
 
 ## Kommandozeile
@@ -86,25 +97,27 @@ python ohricut_app.py --help
 ### WAV-Datei verarbeiten
 
 ```bash
-python ohricut_app.py verarbeite /pfad/zur/datei.wav
+python ohricut_app.py process /pfad/zur/datei.wav
 ```
+*(Alternativ: `python ohricut_app.py verarbeite /pfad/zur/datei.wav`)*
 
 Die Verarbeitung legt die erkannten Slices und Analyseergebnisse im Ordner `RESULTS/` ab.
 
 ### Track generieren
 
 ```bash
-python ohricut_app.py generiere Dynamik 32 125 Energetisch
+python ohricut_app.py generate Dynamic 32 125 Energetic
 ```
+*(Alternativ: `python ohricut_app.py generiere Dynamik 32 125 Energetisch`)*
 
 Argumente:
 
 | Argument | Bedeutung | Standard |
 |---|---|---|
-| `Modus` | Historischer Platzhalter; wird vom aktuellen Generator nicht ausgewertet | – |
-| `takte` | Anzahl der Takte (8 bis 256) | `32` |
+| `Modus` / `Mode` | Historischer Platzhalter; wird vom aktuellen Generator nicht ausgewertet | – |
+| `takte` / `bars` | Anzahl der Takte (8 bis 256) | `32` |
 | `bpm` | Tempo (40 bis 240 BPM) | `125` |
-| `stimmung` | Generator-Stimmung | `Energetisch` |
+| `stimmung` / `mood` | Generator-Stimmung (`Energetic`/`Energetisch`, `Relaxed`/`Entspannt`, `Minimal`) | `Energetic` / `Energetisch` |
 
 Die Generierung verwendet die gespeicherte Generator-Auswahl und die vorhandenen Einstellungen. Mindestens ein verwendbares Drum-Sample muss ausgewählt sein. Die erzeugte WAV-Datei wird in `GENERATED_MUSIC/` gespeichert.
 

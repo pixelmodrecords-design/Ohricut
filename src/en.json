@@ -115,7 +115,11 @@
     "track_duration_exceeded": "Track length ({dauer:.0f} s) exceeds the maximum of {max_s} s. Use fewer bars or increase the BPM.",
     "at_least_one_drum": "Select at least one drum sample.",
     "unknown_category": "Unknown category: {kat}",
-    "invalid_entry": "Invalid entry: {rel}"
+    "invalid_entry": "Invalid entry: {rel}",
+    "load_settings_failed": "Error loading settings: {ex}",
+    "save_settings_failed": "Error saving settings: {ex}",
+    "write_cache_failed": "Error writing pool cache: {ex}",
+    "analyze_sample_failed": "Error analyzing pool sample {dateiname}: {ex}"
   },
   "cli": {
     "specify_wav": "Error: Please specify a WAV file.",
