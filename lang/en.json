@@ -1,0 +1,140 @@
+{
+  "status": {
+    "ready": "Ready",
+    "job_running": "A job is already running.",
+    "error": "Error: {ex}",
+    "list_cleared": "List cleared",
+    "processing_started": "Processing started …",
+    "processing_done_slices": "Processing complete: {slices} slices in RESULTS/{ordner}",
+    "track_created": "Track created: {dateiname}",
+    "move_cancelled": "Move cancelled.",
+    "select_slice_first": "Select a slice first.",
+    "tap_target_category": "Tap a target category.",
+    "moved_to": "Moved to {kat}.",
+    "sample_deleted": "Sample “{name}” deleted!",
+    "added_to_selection": "“{name}” added to Generator Selection.",
+    "removed_from_selection": "Removed from Generator Selection.",
+    "generation_started": "Beat generation started …",
+    "slice_moved_to_pool": "Slice moved to POOL/{kat}/!"
+  },
+  "ui": {
+    "report_title": "REPORT",
+    "autoplay_on": "Autoplay: ON",
+    "autoplay_off": "Autoplay: OFF",
+    "language_switch": "Language: EN",
+    "places": {
+      "App": "App",
+      "Download": "Download",
+      "Musik": "Music",
+      "Speicher": "Storage"
+    },
+    "cut": {
+      "initial_report": "Select a WAV file and tap “Process”.",
+      "btn_process": "PROCESS",
+      "candidates_title": "Available Slices ({ordner} – {n}):",
+      "nothing_processed_yet": "Nothing processed yet.",
+      "no_slices_initial": "No slices available. Process a WAV file first.",
+      "no_slices_folder": "No slices in this folder.",
+      "btn_clear_list": "Clear List",
+      "selected_file_report": "Selected: {ziel}\nTap “Process” to start.",
+      "cleared_report": "List cleared. Select a WAV file and tap “Process”.",
+      "processing_report": "Processing: {wav}\nPlease wait …",
+      "processing_done_report": "Processing complete! Folder: {ordner}\nTempo: {bpm} BPM | Offset: {versatz} ms\nSlices: {slices} | Empty/Silence: {leer}\nSlices by Category: M:{m} P:{p} V:{v}",
+      "processing_aborted_report": "Processing aborted. See the status area for details."
+    },
+    "pool": {
+      "tab_library": "1. Sample Library (LIBRARY)",
+      "tab_generator": "2. Generator Pool",
+      "library_content_title": "Samples in “{kat}” ({n} files):",
+      "btn_add_to_selection": "Add to Generator Selection",
+      "btn_delete": "Remove from Pool Selection",
+      "active_generator_samples_title": "Active Samples in Generator Pool ({n}):",
+      "btn_remove_from_selection": "Remove from Generator Selection",
+      "empty_slot": "Empty",
+      "btn_move": "MOVE"
+    },
+    "generate": {
+      "title": "BEAT GENERATOR",
+      "drum_mode": "Drum Mode:",
+      "mood": "Mood:",
+      "mood_names": {
+        "Energetisch": "Energetic",
+        "Entspannt": "Relaxed",
+        "Minimal": "Minimal"
+      },
+      "bpm_bars_title": "BPM ({bpm}) & Bars ({takte}):",
+      "bars_format": "{takte} Bars",
+      "sidechain": "Sidechain Ducking:",
+      "bass_synth_section": "Bass Synth & Samples:",
+      "bass_synth_on": "Bass Synth: ON",
+      "bass_synth_off": "Bass Synth: OFF",
+      "root_note_format": "Root Note: {ton}",
+      "mode_format": "Mode: {modus}",
+      "modes": {
+        "Dur": "Major",
+        "Moll": "Minor"
+      },
+      "bass_sound_type": "Bass Synth Type:",
+      "bass_sounds": {
+        "saegeszahn": "Sawtooth",
+        "saettigung": "Saturation",
+        "slap": "Slap",
+        "flaechig": "Pad"
+      },
+      "transitions_fills": "Transitions & Fills:",
+      "transition_melody_on": "Melody Transitions: ON",
+      "transition_melody_off": "Melody Transitions: OFF",
+      "transition_drums_on": "Drum Fills: ON",
+      "transition_drums_off": "Drum Fills: OFF",
+      "variation_controls": "Variation Controls (0–5):",
+      "voice_variation": "Voice Variation",
+      "melodie_variation": "Melody Variation",
+      "btn_generate": "GENERATE BEAT (from POOL/)"
+    }
+  },
+  "pipeline": {
+    "wav_format_not_supported": "WAV format is not supported.",
+    "searching_silence": "Searching for silence …",
+    "searching_vocals": "Searching for vocal phrases …",
+    "estimating_tempo": "Estimating tempo …",
+    "tempo_offset_slicing": "{bpm:.1f} BPM, offset: {versatz} ms. Slicing …",
+    "slices_analyzed": "{i}/{n} slices analyzed",
+    "analyzing_slices": "Analyzing {k} slices …"
+  },
+  "logic": {
+    "voice_min_duration": "VOICE samples must be at least {min_s} s long ({dauer:.2f} s)",
+    "invalid_category": "Invalid category: {kat}",
+    "sample_already_in_category": "Sample is already in {kat}.",
+    "file_not_in_library": "File is not in the LIBRARY.",
+    "category_full": "{kat} is full ({plaetze}/{plaetze})",
+    "already_in_selection": "Already in the selection.",
+    "not_in_selection": "Not in the selection.",
+    "unknown_mood": "Unknown mood: '{stimmung}'",
+    "invalid_bpm": "BPM must be an integer between 40 and 240.",
+    "invalid_bars": "The number of bars must be an integer between 8 and 256.",
+    "track_duration_exceeded": "Track length ({dauer:.0f} s) exceeds the maximum of {max_s} s. Use fewer bars or increase the BPM.",
+    "at_least_one_drum": "Select at least one drum sample.",
+    "unknown_category": "Unknown category: {kat}",
+    "invalid_entry": "Invalid entry: {rel}"
+  },
+  "cli": {
+    "specify_wav": "Error: Please specify a WAV file.",
+    "file_not_found": "Error: File '{pfad}' not found.",
+    "processing_complete": "Processing completed successfully:",
+    "processing_failed": "Processing failed: {ex}",
+    "invalid_bars_bpm": "Error: Bars and BPM must be integers. Example: generate Dynamic 32 125",
+    "generating_track": "Generating track ({takte} bars, {bpm} BPM, mood: {stimmung})...",
+    "invalid_input": "Invalid input: {ex}",
+    "generation_failed": "Track generation failed: {ex}",
+    "track_generated": "Track generated successfully: {pfad}",
+    "unknown_command": "Unknown command: {cmd}",
+    "details": {
+      "folder": "Folder",
+      "bpm": "BPM",
+      "offset": "Offset",
+      "slices": "Slices",
+      "empty": "Empty"
+    },
+    "help": "\n========================================================================\n                       OHRICUT - Help & Guide\n========================================================================\n\nOHRICUT is a tool for quickly creating beats and loops from your own\naudio material.\n\n1. GRAPHICAL USER INTERFACE (GUI)\n------------------------------------------------------------------------\nRun without arguments:\n  python3 ohricut_app.py\n\nThe interface is divided into three tabs:\n  - CUT:      Select WAV file, inspect silence & tempo,\n              slice to grid. The lower half displays all\n              slices with detailed properties.\n  - POOL:     Preview slices and manually move them into POOL folders.\n              Contains a detail view of all samples loaded into\n              the generator.\n  - GENERATE: Create beats from the approved POOL.\n              Output in GENERATED_MUSIC/.\n  - Settings (Drum Mode, Sidechain, Bass, Transitions, Variations) are located under GENERATE.\n\n2. COMMAND LINE (CLI)\n------------------------------------------------------------------------\n- Show help:\n    python3 ohricut_app.py help (or: hilfe, --help)\n\n- Process file (CUT step):\n    python3 ohricut_app.py process /path/to/file.wav (or: verarbeite)\n\n- Generate track (GENERATE step):\n    python3 ohricut_app.py generate <Mode> [bars] [bpm] [mood] (or: generiere)\n========================================================================\n"
+  }
+}

@@ -12,13 +12,18 @@ pygame = None
 
 import ohricut_kern as kern
 import ohricut_logik as logik
+import ohricut_i18n as i18n
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULTS_DIR = os.path.join(SCRIPT_DIR, "RESULTS")
 POOL_DIR = os.path.join(SCRIPT_DIR, "POOL")
 
+# Initiale Sprache aus Einstellungen laden (Default: en)
+_initial_einst = logik.lade_einstellungen()
+i18n.setze_sprache(_initial_einst.get("sprache", "en"))
+
 # ============ Hintergrund-Auftragsverwaltung ============
-STATUS = {"text": "bereit", "busy": False, "thread": None, "ergebnis": None}
+STATUS = {"text": i18n.t("status.ready"), "busy": False, "thread": None, "ergebnis": None}
 
 
 def melde(text):
@@ -42,7 +47,7 @@ def leere_results():
 
 def starte_auftrag(fn, *args):
     if STATUS["busy"]:
-        melde("Es läuft schon ein Auftrag")
+        melde(i18n.t("status.job_running"))
         return False
     STATUS["busy"] = True
     STATUS["ergebnis"] = None
@@ -52,7 +57,7 @@ def starte_auftrag(fn, *args):
             res = fn(*args)
             STATUS["ergebnis"] = res
         except Exception as ex:
-            melde(f"Fehler: {ex}")
+            melde(i18n.t("status.error", ex=ex))
             traceback.print_exc()
         finally:
             STATUS["busy"] = False
@@ -65,44 +70,7 @@ def starte_auftrag(fn, *args):
 
 # ============ CLI Hilfe ============
 def zeige_hilfe():
-    hilfe_text = """
-========================================================================
-                       OHRICUT - Hilfe & Anleitung
-========================================================================
-
-OHRICUT ist ein Werkzeug zum schnellen Erstellen von Beats und Loops aus
-eigenem Audiomaterial.
-
-1. GRAPHISCHE OBERFLÄCHE (GUI)
-------------------------------------------------------------------------
-Aufruf ohne Argumente:
-  python3 ohricut_app.py
-
-Die Oberfläche gliedert sich in vier Reiter:
-  - CUT:      WAV-Datei auswählen, auf Stille & Tempo untersuchen,
-              auf Raster schneiden. In der unteren Hälfte werden alle
-              Slices mit detaillierten Eigenschaften angezeigt.
-  - POOL:     Slices vorhören und gezielt per Hand freigeben (verschieben)
-              in die POOL-Ordner. Enthält eine Detailansicht aller Samples,
-              die in den Generator geladen werden.
-  - GENERATE: Beats aus dem freigegebenen POOL erzeugen (Dynamik,
-              Sequenzer, Chaos/Fraktal). Output in GENERATED_MUSIC/.
-  - Einstellungen (Drum-Modus, Sidechain, Bass, Übergänge, Variationen) liegen unter GENERATE.
-
-2. KOMMANDOZEILE (CLI)
-------------------------------------------------------------------------
-- Hilfe anzeigen:
-    python3 ohricut_app.py hilfe
-    python3 ohricut_app.py --help
-
-- Datei verarbeiten (CUT-Schritt):
-    python3 ohricut_app.py verarbeite /pfad/zur/datei.wav
-
-- Track generieren (GENERATE-Schritt):
-    python3 ohricut_app.py generiere <Modus> [takte] [bpm] [stimmung]
-========================================================================
-"""
-    print(hilfe_text)
+    print(i18n.t("cli.help"))
 
 
 # ============ Pygame UI Helpers ============
@@ -191,11 +159,17 @@ def format_generator_zeile(item):
     rolle = item.get("rolle")
     kopf = f"[{kat_anzeige(kat)}]" + (f" {rolle}:" if rolle else "")
     if not item.get("full_path"):
-        return f"{kopf} leer" if rolle else f"{kopf}: leer"
+        leer_txt = i18n.t("ui.pool.empty_slot")
+        return f"{kopf} {leer_txt}" if rolle else f"{kopf}: {leer_txt}"
     teile = [item.get("file", ""), f"{item.get('dauer', 0.0):.2f}s"]
     tonart = item.get("tonart")
     if kat in ("MELODY", "VOICE") and tonart and tonart != "None":
-        teile.append(str(tonart))
+        # Tonart-Modus ggf. übersetzen (z.B. 'C Dur' -> 'C Major' bzw. 'C Dur')
+        tonart_str = str(tonart)
+        for de_m, key_m in [("Dur", "Dur"), ("Moll", "Moll")]:
+            if de_m in tonart_str:
+                tonart_str = tonart_str.replace(de_m, i18n.t(f"ui.generate.modes.{key_m}", de_m))
+        teile.append(tonart_str)
     return f"{kopf} " + " | ".join(teile)
 
 
@@ -239,7 +213,7 @@ def job_freigeben(quelle, kat, meldung):
 
 def job_loeschen(kat, name):
     logik.loesche_aus_pool(kat, name)
-    melde(f"Sample '{name}' gelöscht!")
+    melde(i18n.t("status.sample_deleted", name=name))
 
 
 # ============ Farben (Palette laut Vorgabe) ============
@@ -287,6 +261,10 @@ def ui_main():
     sb_w = S(24)
     bericht_h = S(120)
 
+    einstellungen = logik.lade_einstellungen()
+    i18n.setze_sprache(einstellungen.get("sprache", "en"))
+    STATUS["text"] = i18n.t("status.ready")
+
     app_state = {
         "aktiver_reiter": "CUT",
         "autoplay": True,
@@ -297,7 +275,7 @@ def ui_main():
         "gewaehlte_wav": None,
         "letzter_verarbeiteter_ordner": None,
         "gewaehlter_detail_slice": None,
-        "cut_bericht": "Wähle eine WAV-Datei aus und drücke auf 'Verarbeiten'.",
+        "cut_bericht": i18n.t("ui.cut.initial_report"),
         "verarbeitung_laeuft": False,
         # POOL State
         "pool_ansicht": "BESTAND",  # BESTAND / GENERATOR_POOL
@@ -313,7 +291,7 @@ def ui_main():
         "gen_takte": 32,
         "gen_scroll": 0,
         "gen_gewichte": {"motiv": 50, "phrase": 50, "trans": 30},
-        "einstellungen": logik.lade_einstellungen()
+        "einstellungen": einstellungen
     }
 
     zonen = {}
@@ -377,7 +355,7 @@ def ui_main():
         """Festes Berichtsfeld unten, auf allen Seiten gleich."""
         r = pygame.Rect(pad, H - bericht_h - pad, W - 2 * pad, bericht_h)
         pygame.draw.rect(screen, PANEL, r, border_radius=S(8))
-        screen.blit(small.render("BERICHT", True, ACCENT_YELLOW), (r.x + S(8), r.y + S(6)))
+        screen.blit(small.render(i18n.t("ui.report_title"), True, ACCENT_YELLOW), (r.x + S(8), r.y + S(6)))
         by = r.y + S(28)
         for zeile in zeilen:
             screen.blit(small.render(kuerzen(zeile, 56), True, TEXT_LIGHT), (r.x + S(8), by))
@@ -419,28 +397,37 @@ def ui_main():
                 app_state["letzter_verarbeiteter_ordner"] = ordner_basename
                 app_state["verarbeitung_laeuft"] = False
                 app_state["cut_bericht"] = (
-                    f"Fertig! Ordner: {ordner_basename}\n"
-                    f"Tempo: {res['bpm']} BPM | Versatz: {res['versatz_ms']} ms\n"
-                    f"Slices: {res['slices']} | Leer/Stille: {res['leer']}\n"
-                    f"Slices je Kat: M:{z.get('MELODY',0)} P:{z.get('PERCUSSION',0)} V:{z.get('VOICE',0)}"
+                    i18n.t("ui.cut.processing_done_report",
+                           ordner=ordner_basename,
+                           bpm=res['bpm'],
+                           versatz=res['versatz_ms'],
+                           slices=res['slices'],
+                           leer=res['leer'],
+                           m=z.get('MELODY', 0),
+                           p=z.get('PERCUSSION', 0),
+                           v=z.get('VOICE', 0))
                 )
                 if "bpm" in res and res["bpm"]:
                     app_state["gen_bpm"] = int(round(res["bpm"]))
-                melde(f"Fertig: {res['slices']} Slices in RESULTS/{ordner_basename}")
+                melde(i18n.t("status.processing_done_slices", slices=res['slices'], ordner=ordner_basename))
             elif isinstance(res, str) and res.endswith(".wav"):
-                melde(f"Fertig: Track erzeugt in {os.path.basename(res)}")
+                melde(i18n.t("status.track_created", dateiname=os.path.basename(res)))
             STATUS["ergebnis"] = None
 
         # Verarbeitung ist ohne Ergebnis beendet: Fehler steht in der Statuszeile
         if app_state["verarbeitung_laeuft"] and not STATUS["busy"]:
             app_state["verarbeitung_laeuft"] = False
-            app_state["cut_bericht"] = "Verarbeitung abgebrochen. Details siehe Status."
+            app_state["cut_bericht"] = i18n.t("ui.cut.processing_aborted_report")
 
-        # 1. Kopfzeile mit App-Titel & Autoplay Toggle
+        # 1. Kopfzeile mit App-Titel, Sprachumschalter & Autoplay Toggle
         screen.blit(title_font.render("OHRICUT v5", True, ACCENT_ORANGE), (pad, pad))
+        r_lang = pygame.Rect(W - pad - S(250), pad, S(115), S(28))
+        zonen["lang_toggle"] = r_lang
+        btn(r_lang, i18n.t("ui.language_switch"), active=True)
+
         r_autoplay = pygame.Rect(W - pad - S(130), pad, S(130), S(28))
         zonen["autoplay_toggle"] = r_autoplay
-        btn(r_autoplay, f"Autoplay: {'AN' if app_state['autoplay'] else 'AUS'}", active=app_state["autoplay"])
+        btn(r_autoplay, i18n.t("ui.autoplay_on") if app_state["autoplay"] else i18n.t("ui.autoplay_off"), active=app_state["autoplay"])
 
         # 2. Reiter-Leiste
         y_tabs = pad + S(36)
@@ -464,7 +451,8 @@ def ui_main():
             ort_rects = row_eq(cy, len(START_ORTE), S(28))
             for r, (label, pfad) in zip(ort_rects, START_ORTE):
                 zonen[("cut_ort", pfad)] = r
-                btn(r, label, active=(app_state["cut_dir"] == pfad))
+                label_uebersetzt = i18n.t(f"ui.places.{label}", label)
+                btn(r, label_uebersetzt, active=(app_state["cut_dir"] == pfad))
             cy += S(28) + gap
 
             pfad_text = small.render(kuerzen(app_state["cut_dir"], 45), True, TEXT_MUTED)
@@ -510,10 +498,11 @@ def ui_main():
             wav_aktiv = app_state["gewaehlte_wav"] is not None and not STATUS["busy"] and not kandidaten
             if wav_aktiv:
                 zonen["cut_verarbeiten"] = r_verarbeiten
-            btn(r_verarbeiten, "VERARBEITEN", active=wav_aktiv, disabled=not wav_aktiv)
+            btn(r_verarbeiten, i18n.t("ui.cut.btn_process"), active=wav_aktiv, disabled=not wav_aktiv)
             cy += S(36) + gap
 
-            screen.blit(small.render(f"Kandidaten ({akt_ordner or 'noch nichts verarbeitet'} - {len(kandidaten)} Stück):", True, ACCENT_YELLOW), (content_rect.x + pad, cy))
+            ordner_anzeige = akt_ordner or i18n.t("ui.cut.nothing_processed_yet")
+            screen.blit(small.render(i18n.t("ui.cut.candidates_title", ordner=ordner_anzeige, n=len(kandidaten)), True, ACCENT_YELLOW), (content_rect.x + pad, cy))
             cy += S(18)
 
             move_h = S(36)
@@ -529,7 +518,7 @@ def ui_main():
             detail_item_w = detail_list_rect.w - (sb_w if max_slice_scroll > 0 else 0)
 
             if not kandidaten:
-                hinweis = "Keine Kandidaten. Verarbeite zuerst eine WAV-Datei." if not akt_ordner else "Keine Kandidaten in diesem Ordner."
+                hinweis = i18n.t("ui.cut.no_slices_initial") if not akt_ordner else i18n.t("ui.cut.no_slices_folder")
                 screen.blit(small.render(hinweis, True, TEXT_MUTED), (detail_list_rect.x + S(8), detail_list_rect.y + S(12)))
             else:
                 for i, (kat, f_name, f_full) in enumerate(kandidaten[app_state["cut_slice_scroll"]:app_state["cut_slice_scroll"] + vis_details]):
@@ -553,7 +542,7 @@ def ui_main():
                     leeren_aktiv = akt_ordner is not None and not STATUS["busy"]
                     if leeren_aktiv:
                         zonen["cut_leeren"] = r
-                    btn(r, "Liste leeren", gefahr=leeren_aktiv)
+                    btn(r, i18n.t("ui.cut.btn_clear_list"), gefahr=leeren_aktiv)
                     continue
                 zonen[("cut_verschiebe", kat)] = r
                 btn(r, f"{kat_anzeige(kat)}", active=kandidat_gewaehlt)
@@ -565,8 +554,8 @@ def ui_main():
             ansicht_rects = row_eq(cy, 2, S(30))
             zonen[("pool_ansicht", "BESTAND")] = ansicht_rects[0]
             zonen[("pool_ansicht", "GENERATOR_POOL")] = ansicht_rects[1]
-            btn(ansicht_rects[0], "1. Pool-Bestand (LIBRARY)", active=(app_state["pool_ansicht"] == "BESTAND"))
-            btn(ansicht_rects[1], "2. Generator Pool", active=(app_state["pool_ansicht"] == "GENERATOR_POOL"))
+            btn(ansicht_rects[0], i18n.t("ui.pool.tab_library"), active=(app_state["pool_ansicht"] == "BESTAND"))
+            btn(ansicht_rects[1], i18n.t("ui.pool.tab_generator"), active=(app_state["pool_ansicht"] == "GENERATOR_POOL"))
             cy += S(30) + pad
 
             if app_state["pool_ansicht"] == "BESTAND":
@@ -574,7 +563,7 @@ def ui_main():
                 for r, kat in kat_rects:
                     if kat == "MOVE":
                         zonen["pool_move"] = r
-                        btn(r, "MOVE", active=app_state["pool_move"], sonder=ACCENT_YELLOW)
+                        btn(r, i18n.t("ui.pool.btn_move"), active=app_state["pool_move"], sonder=ACCENT_YELLOW)
                         continue
                     zonen[("pool_kat_filter", kat)] = r
                     btn(r, kat_anzeige(kat), active=(app_state["pool_kat_filter"] == kat))
@@ -583,7 +572,7 @@ def ui_main():
                 cy += kat_h + pad
 
                 pool_dateien = lade_pool_dateien_fuer_kategorie(app_state["pool_kat_filter"])
-                screen.blit(small.render(f"Pool-Inhalt in '{kat_anzeige(app_state['pool_kat_filter'])}' ({len(pool_dateien)} Dateien):", True, TEXT_MUTED), (content_rect.x + pad, cy))
+                screen.blit(small.render(i18n.t("ui.pool.library_content_title", kat=kat_anzeige(app_state['pool_kat_filter']), n=len(pool_dateien)), True, TEXT_MUTED), (content_rect.x + pad, cy))
                 cy += S(18)
 
                 vis_bestand = 7
@@ -609,17 +598,17 @@ def ui_main():
                 sample_gewaehlt = app_state["gewaehltes_pool_sample"] is not None
                 r_auswahl = pygame.Rect(content_rect.x + pad, cy, content_rect.w - 2 * pad, S(38))
                 zonen["pool_zur_auswahl"] = r_auswahl
-                btn(r_auswahl, "Zur Auswahl (Generator)", active=sample_gewaehlt)
+                btn(r_auswahl, i18n.t("ui.pool.btn_add_to_selection"), active=sample_gewaehlt)
                 cy += S(38) + gap
                 r_loeschen = pygame.Rect(content_rect.x + pad, cy, content_rect.w - 2 * pad, S(38))
                 zonen["pool_sample_loeschen"] = r_loeschen
-                btn(r_loeschen, "Aus Pool entfernen / löschen", disabled=not sample_gewaehlt, gefahr=True)
+                btn(r_loeschen, i18n.t("ui.pool.btn_delete"), disabled=not sample_gewaehlt, gefahr=True)
 
             else:
                 # GENERATOR POOL: Auswahl für den Generator
                 gen_samples = lade_aktive_generator_pool_details()
                 n_belegt = sum(1 for g in gen_samples if g.get("full_path"))
-                screen.blit(small.render(f"Aktive Generator Pool-Samples ({n_belegt} Stück):", True, ACCENT_YELLOW), (content_rect.x + pad, cy))
+                screen.blit(small.render(i18n.t("ui.pool.active_generator_samples_title", n=n_belegt), True, ACCENT_YELLOW), (content_rect.x + pad, cy))
                 cy += S(20)
 
                 gen_h = content_rect.bottom - cy - pad - S(38) - gap
@@ -649,7 +638,7 @@ def ui_main():
                 rahmen(gen_list_rect)
                 r_entf = pygame.Rect(content_rect.x + pad, gen_list_rect.bottom + gap, content_rect.w - 2 * pad, S(38))
                 zonen["gen_aus_auswahl"] = r_entf
-                btn(r_entf, "Aus Auswahl entfernen", disabled=app_state["gewaehltes_generator_sample"] is None, gefahr=True)
+                btn(r_entf, i18n.t("ui.pool.btn_remove_from_selection"), disabled=app_state["gewaehltes_generator_sample"] is None, gefahr=True)
 
         # ==================== REITER 3: GENERATE ====================
         elif akt_reiter == "GENERATE":
@@ -657,11 +646,11 @@ def ui_main():
             screen.set_clip(content_rect)
             cy = content_rect.y + pad - app_state["gen_scroll"]
 
-            screen.blit(font.render("GENERATE: Erzeugung", True, ACCENT_YELLOW), (content_rect.x + pad, cy))
+            screen.blit(font.render(i18n.t("ui.generate.title"), True, ACCENT_YELLOW), (content_rect.x + pad, cy))
             cy += S(30)
 
             # Einstellungen (früher MODE-Reiter), unter dem Generate-Knopf
-            screen.blit(small.render("Drum-Modus:", True, ACCENT_YELLOW), (content_rect.x + pad, cy))
+            screen.blit(small.render(i18n.t("ui.generate.drum_mode"), True, ACCENT_YELLOW), (content_rect.x + pad, cy))
             cy += S(22)
             dm_rects = row(cy, 3, S(32))
             for r, dm in zip(dm_rects, ["straight", "break", "shuffle"]):
@@ -669,16 +658,15 @@ def ui_main():
                 btn(r, dm, active=(e.get("drum_modus") == dm))
             cy += S(38)
 
-
-            screen.blit(small.render("Stimmung:", True, ACCENT_YELLOW), (content_rect.x + pad, cy))
+            screen.blit(small.render(i18n.t("ui.generate.mood"), True, ACCENT_YELLOW), (content_rect.x + pad, cy))
             cy += S(20)
             stimmungen = ["Energetisch", "Entspannt", "Minimal"]
             for r, st in zip(row(cy, 3, S(32)), stimmungen):
                 zonen[("gen_stimmung", st)] = r
-                btn(r, st, active=(app_state["gen_stimmung"] == st))
+                btn(r, i18n.t(f"ui.generate.mood_names.{st}", st), active=(app_state["gen_stimmung"] == st))
             cy += S(38)
 
-            screen.blit(small.render(f"BPM ({app_state['gen_bpm']}) & Takte ({app_state['gen_takte']}):", True, ACCENT_YELLOW), (content_rect.x + pad, cy))
+            screen.blit(small.render(i18n.t("ui.generate.bpm_bars_title", bpm=app_state['gen_bpm'], takte=app_state['gen_takte']), True, ACCENT_YELLOW), (content_rect.x + pad, cy))
             cy += S(20)
 
             bpm_rects = row(cy, 5, S(32))
@@ -697,12 +685,12 @@ def ui_main():
             takt_rects = row(cy, 3, S(32))
             for r, t_val in zip(takt_rects, [16, 32, 64]):
                 zonen[("gen_takte", t_val)] = r
-                btn(r, f"{t_val} Takte", active=(app_state["gen_takte"] == t_val))
+                btn(r, i18n.t("ui.generate.bars_format", takte=t_val), active=(app_state["gen_takte"] == t_val))
             cy += S(42)
 
             cy += S(8)
 
-            screen.blit(small.render("Sidechain Ducking:", True, ACCENT_YELLOW), (content_rect.x + pad, cy))
+            screen.blit(small.render(i18n.t("ui.generate.sidechain"), True, ACCENT_YELLOW), (content_rect.x + pad, cy))
             cy += S(22)
             sc_rects = row(cy, 3, S(32))
             for r, sc in zip(sc_rects, ["soft", "mid", "hard"]):
@@ -710,43 +698,49 @@ def ui_main():
                 btn(r, f"{sc} ({logik.SIDECHAIN_DB[sc]}dB)", active=(e.get("sidechain") == sc))
             cy += S(38)
 
-            screen.blit(small.render("Bass Synthesizer & Samples:", True, ACCENT_YELLOW), (content_rect.x + pad, cy))
+            screen.blit(small.render(i18n.t("ui.generate.bass_synth_section"), True, ACCENT_YELLOW), (content_rect.x + pad, cy))
             cy += S(22)
             r_bsynth = pygame.Rect(content_rect.x + pad, cy, S(180), S(32))
             zonen[("mode_bool", "bass_synth")] = r_bsynth
-            btn(r_bsynth, f"Bass Synth: {'AN' if e.get('bass_synth', True) else 'AUS'}", active=e.get('bass_synth', True))
+            bs_active = e.get("bass_synth", True)
+            btn(r_bsynth, i18n.t("ui.generate.bass_synth_on") if bs_active else i18n.t("ui.generate.bass_synth_off"), active=bs_active)
+
             r_grund = pygame.Rect(content_rect.x + pad + S(190), cy, S(120), S(32))
             r_modus = pygame.Rect(content_rect.x + pad + S(320), cy, S(120), S(32))
             zonen[("ziel", "grundton")] = r_grund
             zonen[("ziel", "modus")] = r_modus
-            btn(r_grund, f"Grundton: {kern.TONART_NAMEN[logik.ZIEL['grund']]}", active=True)
-            btn(r_modus, f"Modus: {logik.ZIEL['modus']}", active=True)
+            btn(r_grund, i18n.t("ui.generate.root_note_format", ton=kern.TONART_NAMEN[logik.ZIEL['grund']]), active=True)
+            modus_name = i18n.t(f"ui.generate.modes.{logik.ZIEL['modus']}", logik.ZIEL['modus'])
+            btn(r_modus, i18n.t("ui.generate.mode_format", modus=modus_name), active=True)
             cy += S(38)
 
-            screen.blit(small.render("Bass Synth Klangart:", True, TEXT_MUTED), (content_rect.x + pad, cy))
+            screen.blit(small.render(i18n.t("ui.generate.bass_sound_type"), True, TEXT_MUTED), (content_rect.x + pad, cy))
             cy += S(18)
             klangarten = ["saegeszahn", "saettigung", "slap", "flaechig"]
             ka_rects = row_eq(cy, 4, S(32))
             for r, ka in zip(ka_rects, klangarten):
                 zonen[("mode_val", "bass_synth_klangart", ka)] = r
-                btn(r, ka[:8], active=(e.get("bass_synth_klangart") == ka))
+                btn(r, i18n.t(f"ui.generate.bass_sounds.{ka}", ka), active=(e.get("bass_synth_klangart") == ka))
             cy += S(38)
 
-            screen.blit(small.render("Übergänge & Fills:", True, ACCENT_YELLOW), (content_rect.x + pad, cy))
+            screen.blit(small.render(i18n.t("ui.generate.transitions_fills"), True, ACCENT_YELLOW), (content_rect.x + pad, cy))
             cy += S(22)
             r_umel = pygame.Rect(content_rect.x + pad, cy, S(180), S(32))
             r_udrum = pygame.Rect(content_rect.x + pad + S(190), cy, S(180), S(32))
             zonen[("mode_bool", "uebergang_melodie")] = r_umel
             zonen[("mode_bool", "uebergang_drums")] = r_udrum
-            btn(r_umel, f"Üb. Melodie: {'AN' if e.get('uebergang_melodie', True) else 'AUS'}", active=e.get('uebergang_melodie', True))
-            btn(r_udrum, f"Üb. Drums: {'AN' if e.get('uebergang_drums', True) else 'AUS'}", active=e.get('uebergang_drums', True))
+            umel_active = e.get("uebergang_melodie", True)
+            udrum_active = e.get("uebergang_drums", True)
+            btn(r_umel, i18n.t("ui.generate.transition_melody_on") if umel_active else i18n.t("ui.generate.transition_melody_off"), active=umel_active)
+            btn(r_udrum, i18n.t("ui.generate.transition_drums_on") if udrum_active else i18n.t("ui.generate.transition_drums_off"), active=udrum_active)
             cy += S(38)
 
-            screen.blit(small.render("Variations-Regler (0 bis 5):", True, ACCENT_YELLOW), (content_rect.x + pad, cy))
+            screen.blit(small.render(i18n.t("ui.generate.variation_controls"), True, ACCENT_YELLOW), (content_rect.x + pad, cy))
             cy += S(22)
 
-            for var_key, var_label in [("voice_variation", "Voice Variation"), ("melodie_variation", "Melodie Variation")]:
+            for var_key, var_trans_key in [("voice_variation", "ui.generate.voice_variation"), ("melodie_variation", "ui.generate.melodie_variation")]:
                 val = e.get(var_key, 0)
+                var_label = i18n.t(var_trans_key)
                 screen.blit(small.render(f"{var_label}: {val}", True, TEXT_LIGHT), (content_rect.x + pad, cy + S(6)))
                 for idx_v in range(6):
                     r_shifted = pygame.Rect(content_rect.x + S(160) + idx_v * S(42), cy, S(36), S(28))
@@ -758,7 +752,7 @@ def ui_main():
             r_generate = pygame.Rect(content_rect.x + pad, cy, content_rect.w - 2 * pad, S(48))
             zonen["gen_start"] = r_generate
             gen_bereit = not STATUS["busy"]
-            btn(r_generate, "BEAT GENERIEREN (aus POOL/)", active=gen_bereit, disabled=not gen_bereit)
+            btn(r_generate, i18n.t("ui.generate.btn_generate"), active=gen_bereit, disabled=not gen_bereit)
             cy += S(48) + gap
 
             screen.set_clip(None)
@@ -787,11 +781,19 @@ def ui_main():
                     continue
 
                 hit = [key for key, r in zonen.items() if r.collidepoint(pos) and (
-                    key == "autoplay_toggle" or (isinstance(key, tuple) and key[0] == "tab")
+                    key in ("autoplay_toggle", "lang_toggle") or (isinstance(key, tuple) and key[0] == "tab")
                     or content_rect.collidepoint(pos))]
                 if hit:
                     key = hit[0]
-                    if key == "autoplay_toggle":
+                    if key == "lang_toggle":
+                        neue_sprache = "en" if i18n.hole_sprache() == "de" else "de"
+                        i18n.setze_sprache(neue_sprache)
+                        app_state["einstellungen"]["sprache"] = neue_sprache
+                        speichere_mode()
+                        if STATUS["text"] in ("Bereit", "Ready"):
+                            STATUS["text"] = i18n.t("status.ready")
+
+                    elif key == "autoplay_toggle":
                         app_state["autoplay"] = not app_state["autoplay"]
                         if not app_state["autoplay"]:
                             stoppe_audio_vorhoeren()
@@ -824,7 +826,7 @@ def ui_main():
                                 stoppe_audio_vorhoeren()
                             else:
                                 app_state["gewaehlte_wav"] = ziel
-                                app_state["cut_bericht"] = f"Gewählt: {os.path.basename(ziel)}\nMit 'Verarbeiten' starten."
+                                app_state["cut_bericht"] = i18n.t("ui.cut.selected_file_report", ziel=os.path.basename(ziel))
                                 spiele_audio_vorhoeren(ziel, autoplay_aktiv=app_state["autoplay"])
 
                     elif isinstance(key, tuple) and key[0] == "cut_select_detail_slice":
@@ -836,7 +838,7 @@ def ui_main():
                         gew = app_state["gewaehlter_detail_slice"]
                         if gew:
                             stoppe_audio_vorhoeren()
-                            if starte_auftrag(job_freigeben, gew, kat, f"Kandidat nach POOL/{kat}/ verschoben!"):
+                            if starte_auftrag(job_freigeben, gew, kat, i18n.t("status.slice_moved_to_pool", kat=kat)):
                                 app_state["gewaehlter_detail_slice"] = None
 
                     elif key == "cut_leeren":
@@ -845,8 +847,8 @@ def ui_main():
                         app_state["letzter_verarbeiteter_ordner"] = None
                         app_state["gewaehlter_detail_slice"] = None
                         app_state["cut_slice_scroll"] = 0
-                        app_state["cut_bericht"] = "Liste geleert. Wähle eine WAV-Datei und drücke auf 'Verarbeiten'."
-                        melde("Liste geleert")
+                        app_state["cut_bericht"] = i18n.t("ui.cut.cleared_report")
+                        melde(i18n.t("status.list_cleared"))
 
                     elif key == "cut_verarbeiten":
                         wav = app_state["gewaehlte_wav"]
@@ -854,9 +856,9 @@ def ui_main():
                             stoppe_audio_vorhoeren()
                             app_state["letzter_verarbeiteter_ordner"] = None
                             app_state["gewaehlter_detail_slice"] = None
-                            melde("Verarbeitung gestartet...")
+                            melde(i18n.t("status.processing_started"))
                             app_state["verarbeitung_laeuft"] = True
-                            app_state["cut_bericht"] = f"Läuft: {os.path.basename(wav)}\nBitte warten ..."
+                            app_state["cut_bericht"] = i18n.t("ui.cut.processing_report", wav=os.path.basename(wav))
                             starte_auftrag(
                                 lambda w, m: kern.verarbeite(w, m, results_dir=RESULTS_DIR),
                                 wav, melde
@@ -873,19 +875,19 @@ def ui_main():
                     elif key == "pool_move":
                         if app_state["pool_move"]:
                             app_state["pool_move"] = False
-                            melde("Verschieben abgebrochen")
+                            melde(i18n.t("status.move_cancelled"))
                         elif app_state["gewaehltes_pool_sample"] is None:
-                            melde("Erst einen Slice markieren")
+                            melde(i18n.t("status.select_slice_first"))
                         else:
                             app_state["pool_move"] = True
-                            melde("Ziel-Kategorie antippen")
+                            melde(i18n.t("status.tap_target_category"))
 
                     elif isinstance(key, tuple) and key[0] == "pool_kat_filter" and app_state["pool_move"]:
                         sample = app_state["gewaehltes_pool_sample"]
                         rel = f"{app_state['pool_kat_filter']}/{sample[0]}"
                         try:
                             logik.verschiebe_in_pool(rel, key[1])
-                            melde(f"Verschoben nach {key[1]}")
+                            melde(i18n.t("status.moved_to", kat=key[1]))
                             app_state["pool_move"] = False
                             app_state["gewaehltes_pool_sample"] = None
                             stoppe_audio_vorhoeren()
@@ -918,7 +920,7 @@ def ui_main():
                         if sample:
                             try:
                                 logik.auswahl_hinzufuegen(f"{app_state['pool_kat_filter']}/{sample[0]}")
-                                melde(f"'{sample[0]}' zur Auswahl hinzugefügt")
+                                melde(i18n.t("status.added_to_selection", name=sample[0]))
                             except ValueError as ex:
                                 melde(str(ex))
 
@@ -927,7 +929,7 @@ def ui_main():
                         if voll:
                             try:
                                 logik.auswahl_entfernen(os.path.relpath(voll, POOL_DIR).replace(os.sep, "/"))
-                                melde("Aus der Auswahl entfernt")
+                                melde(i18n.t("status.removed_from_selection"))
                                 app_state["gewaehltes_generator_sample"] = None
                             except ValueError as ex:
                                 melde(str(ex))
@@ -944,7 +946,7 @@ def ui_main():
 
                     elif key == "gen_start":
                         stoppe_audio_vorhoeren()
-                        melde("Generierung gestartet...")
+                        melde(i18n.t("status.generation_started"))
                         starte_auftrag(
                             logik.generiere_track,
                             app_state["gen_bpm"],
@@ -1016,13 +1018,13 @@ if __name__ == "__main__":
         ui_main()
     elif args[0] in ("hilfe", "--help", "-h", "help", "/?"):
         zeige_hilfe()
-    elif args[0] == "verarbeite":
+    elif args[0] in ("process", "verarbeite"):
         if len(args) < 2:
-            print("Fehler: Bitte eine WAV-Datei angeben.")
+            print(i18n.t("cli.specify_wav"))
             sys.exit(1)
         wav_pfad = args[1]
         if not os.path.isfile(wav_pfad):
-            print(f"Fehler: Datei '{wav_pfad}' nicht gefunden.")
+            print(i18n.t("cli.file_not_found", pfad=wav_pfad))
             sys.exit(1)
 
         def meldung(text):
@@ -1030,39 +1032,40 @@ if __name__ == "__main__":
 
         try:
             res = kern.verarbeite(wav_pfad, meldung, results_dir=RESULTS_DIR)
-            print("\nProcessing erfolgreich abgeschlossen:")
-            print(f"  Ordner:     {res['ordner']}")
-            print(f"  BPM:        {res['bpm']}")
-            print(f"  Versatz:    {res['versatz_ms']} ms")
-            print(f"  Slices:     {res['slices']}")
-            print(f"  Leer:       {res['leer']}")
+            print(f"\n{i18n.t('cli.processing_complete')}")
+            print(f"  {i18n.t('cli.details.folder')}:     {res['ordner']}")
+            print(f"  {i18n.t('cli.details.bpm')}:        {res['bpm']}")
+            print(f"  {i18n.t('cli.details.offset')}:     {res['versatz_ms']} ms")
+            print(f"  {i18n.t('cli.details.slices')}:     {res['slices']}")
+            print(f"  {i18n.t('cli.details.empty')}:      {res['leer']}")
         except Exception as ex:
-            print(f"Fehler bei der Verarbeitung: {ex}")
+            print(i18n.t("cli.processing_failed", ex=ex))
             traceback.print_exc()
             sys.exit(1)
 
-    elif args[0] == "generiere":
+    elif args[0] in ("generate", "generiere"):
         # args[1] (Modus) wird nicht mehr ausgewertet, der Generator kennt keine Modi mehr.
         try:
             takte = int(args[2]) if len(args) > 2 else 32
             bpm = int(args[3]) if len(args) > 3 else 125
         except ValueError:
-            print("Fehler: Takte und BPM müssen ganze Zahlen sein, z. B.: generiere Dynamik 32 125")
+            print(i18n.t("cli.invalid_bars_bpm"))
             sys.exit(1)
         stimmung = args[4] if len(args) > 4 else "Energetisch"
 
-        print(f"[*] Generiere Track ({takte} Takte, {bpm} BPM, Stimmung: {stimmung})...")
+        stimmung_anzeige = i18n.t(f"ui.generate.mood_names.{stimmung}", stimmung)
+        print(i18n.t("cli.generating_track", takte=takte, bpm=bpm, stimmung=stimmung_anzeige))
         try:
             pfad = logik.generiere_track(bpm=bpm, takte=takte, stimmung=stimmung)
         except ValueError as ex:
-            print(f"Ungültige Eingabe: {ex}")
+            print(f"{i18n.t('cli.invalid_input', ex=ex)}")
             sys.exit(1)
         except Exception as ex:
-            print(f"Fehler bei der Generierung: {ex}")
+            print(f"{i18n.t('cli.generation_failed', ex=ex)}")
             traceback.print_exc()
             sys.exit(1)
-        print(f"[+] Track erfolgreich generiert: {pfad}")
+        print(f"[+] {i18n.t('cli.track_generated', pfad=pfad)}")
     else:
-        print(f"Unbekannter Befehl: {args[0]}")
+        print(f"{i18n.t('cli.unknown_command', cmd=args[0])}")
         zeige_hilfe()
         sys.exit(1)

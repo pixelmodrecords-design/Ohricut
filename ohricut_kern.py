@@ -11,6 +11,7 @@ import tempfile
 import uuid
 import hashlib
 import numpy as np
+import ohricut_i18n as i18n
 
 # ============ Konstanten & Schwellwerte ============
 SR = 44100
@@ -95,7 +96,7 @@ def read_wav_mono(path):
     elif sw == 4:
         x = np.frombuffer(raw, "<i4").astype(np.float32) / 2**31
     else:
-        raise ValueError("WAV-Format nicht unterstützt")
+        raise ValueError(i18n.t("pipeline.wav_format_not_supported"))
     return x.reshape(-1, nch).mean(axis=1), sr
 
 
@@ -845,16 +846,16 @@ def verarbeite(pfad, melde_fn, results_dir=None):
     dateiname = os.path.basename(pfad)
     ordner_name = bereinigter_ordnername(dateiname)
 
-    melde_fn("Stille suchen")
+    melde_fn(i18n.t("pipeline.searching_silence"))
     cuts = stille_bereiche(mono, sr)
-    melde_fn("Gesangsphrasen suchen")
+    melde_fn(i18n.t("pipeline.searching_vocals"))
     vokal = []
     for a, b in vokal_bereiche(mono, sr):
         vokal += _ohne_stille(a, b, cuts)
 
-    melde_fn("Tempo schätzen")
+    melde_fn(i18n.t("pipeline.estimating_tempo"))
     bpm, versatz, sicher = schaetze_tempo(mono, sr)
-    melde_fn(f"{bpm:.1f} BPM, Versatz {versatz * 1000:.0f} ms. Schneide...")
+    melde_fn(i18n.t("pipeline.tempo_offset_slicing", bpm=bpm, versatz=round(versatz * 1000)))
 
     raster = [(s, e) for s, e in slices_auf_raster(len(mono), sr, bpm, versatz, cuts)
               if not any(a <= (s + e) // 2 < b for a, b in vokal)]
@@ -889,9 +890,9 @@ def verarbeite(pfad, melde_fn, results_dir=None):
 
         def _fortschritt(i, n):
             if i % 5 == 0 or i == n:
-                melde_fn(f"{i}/{n} Slices analysiert")
+                melde_fn(i18n.t("pipeline.slices_analyzed", i=i, n=n))
 
-        melde_fn(f"{k} Slices werden analysiert")
+        melde_fn(i18n.t("pipeline.analyzing_slices", k=k))
         summe = analysiere(tmp, verschieben=True, fortschritt=_fortschritt)
         with open(os.path.join(tmp, "quelle.json"), "w", encoding="utf-8") as fh:
             json.dump({"datei": dateiname, "sha1": quell_hash}, fh, ensure_ascii=False)
