@@ -128,6 +128,9 @@
     "generation_failed": "Track-Generierung fehlgeschlagen: {ex}",
     "track_generated": "Track erfolgreich generiert: {pfad}",
     "unknown_command": "Unbekannter Befehl: {cmd}",
+    "preview_error": "Vorhör-Fehler: {ex}",
+    "mixer_init_warning": "Mixer Init Warnung: {ex}",
+    "key_detection_failed": "Tonart-Messung fehlgeschlagen: {ex}",
     "details": {
       "folder": "Ordner",
       "bpm": "BPM",

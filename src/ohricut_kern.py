@@ -11,7 +11,10 @@ import tempfile
 import uuid
 import hashlib
 import numpy as np
-import ohricut_i18n as i18n
+try:
+    from src import ohricut_i18n as i18n
+except ImportError:
+    import ohricut_i18n as i18n
 
 # ============ Konstanten & Schwellwerte ============
 SR = 44100
@@ -840,7 +843,7 @@ def verarbeite(pfad, melde_fn, results_dir=None):
     Der Ordnername wird nach Abschnitt 11 des Konzepts bereinigt.
     """
     if results_dir is None:
-        results_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "RESULTS")
+        results_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "RESULTS")
     x, sr = read_wav_mono(pfad)
     mono = x
     dateiname = os.path.basename(pfad)

@@ -11,16 +11,22 @@ import math
 import uuid
 import numpy as np
 
-import ohricut_kern as kern
-import ohricut_i18n as i18n
+try:
+    from src import ohricut_kern as kern
+    from src import ohricut_i18n as i18n
+except ImportError:
+    import ohricut_kern as kern
+    import ohricut_i18n as i18n
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-RESULTS_DIR = os.path.join(SCRIPT_DIR, "RESULTS")
-POOL_DIR = os.path.join(SCRIPT_DIR, "POOL")
-OUT_DIR = os.path.join(SCRIPT_DIR, "GENERATED_MUSIC")
-EINSTELLUNGEN_PFAD = os.path.join(SCRIPT_DIR, "ohricut_einstellungen.json")
+# Das Stammverzeichnis (Projekt-Root) liegt über src/
+SRC_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SRC_DIR)
+RESULTS_DIR = os.path.join(PROJECT_ROOT, "RESULTS")
+POOL_DIR = os.path.join(PROJECT_ROOT, "POOL")
+OUT_DIR = os.path.join(PROJECT_ROOT, "GENERATED_MUSIC")
+EINSTELLUNGEN_PFAD = os.path.join(PROJECT_ROOT, "ohricut_einstellungen.json")
 CACHE_PFAD = os.path.join(POOL_DIR, "pool_cache.json")
-AUSWAHL_PFAD = os.path.join(SCRIPT_DIR, "auswahl_generator.json")
+AUSWAHL_PFAD = os.path.join(PROJECT_ROOT, "auswahl_generator.json")
 
 STANDARD_EINSTELLUNGEN = {
     "sprache": "en",                    # de / en

@@ -8,7 +8,7 @@ import os
 import json
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-LANG_DIR = os.path.join(SCRIPT_DIR, "lang")
+LANG_DIR = SCRIPT_DIR
 
 AKTUELLER_CODE = "en"
 UEBERSETZUNGEN = {}

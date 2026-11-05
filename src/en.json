@@ -128,6 +128,9 @@
     "generation_failed": "Track generation failed: {ex}",
     "track_generated": "Track generated successfully: {pfad}",
     "unknown_command": "Unknown command: {cmd}",
+    "preview_error": "Preview error: {ex}",
+    "mixer_init_warning": "Mixer init warning: {ex}",
+    "key_detection_failed": "Key detection failed: {ex}",
     "details": {
       "folder": "Folder",
       "bpm": "BPM",

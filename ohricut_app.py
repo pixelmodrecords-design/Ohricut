@@ -10,9 +10,9 @@ import traceback
 # pygame wird erst in ui_main() geladen, damit Hilfe, CUT und Generieren ohne Pygame laufen
 pygame = None
 
-import ohricut_kern as kern
-import ohricut_logik as logik
-import ohricut_i18n as i18n
+from src import ohricut_kern as kern
+from src import ohricut_logik as logik
+from src import ohricut_i18n as i18n
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULTS_DIR = os.path.join(SCRIPT_DIR, "RESULTS")
@@ -191,7 +191,7 @@ def spiele_audio_vorhoeren(pfad, autoplay_aktiv=True):
             pygame.mixer.music.load(pfad)
             pygame.mixer.music.play()
     except Exception as ex:
-        print(f"Vorhör-Fehler: {ex}")
+        print(i18n.t("cli.preview_error", ex=ex))
 
 
 def stoppe_audio_vorhoeren():
@@ -236,7 +236,7 @@ def ui_main():
     try:
         pygame.mixer.init(frequency=44100, size=-16, channels=2)
     except Exception as ex:
-        print(f"Mixer Init Warnung: {ex}")
+        print(i18n.t("cli.mixer_init_warning", ex=ex))
 
     screen = pygame.display.set_mode((0, 0))
     W, H = screen.get_size()
@@ -393,7 +393,7 @@ def ui_main():
                 try:
                     logik.setze_ziel_aus_tonart(logik.ziel_tonart(logik.sync_pool_cache()))
                 except Exception as ex:
-                    print(f"Tonart-Messung fehlgeschlagen: {ex}")
+                    print(i18n.t("cli.key_detection_failed", ex=ex))
                 app_state["letzter_verarbeiteter_ordner"] = ordner_basename
                 app_state["verarbeitung_laeuft"] = False
                 app_state["cut_bericht"] = (
