@@ -114,6 +114,7 @@
     "invalid_bars": "The number of bars must be an integer between 8 and 256.",
     "track_duration_exceeded": "Track length ({dauer:.0f} s) exceeds the maximum of {max_s} s. Use fewer bars or increase the BPM.",
     "at_least_one_drum": "Select at least one drum sample.",
+    "invalid_drum_mode": "Invalid drum mode: '{mode}'. Allowed modes: straight, break, shuffle",
     "unknown_category": "Unknown category: {kat}",
     "invalid_entry": "Invalid entry: {rel}",
     "load_settings_failed": "Error loading settings: {ex}",
@@ -126,7 +127,8 @@
     "file_not_found": "Error: File '{pfad}' not found.",
     "processing_complete": "Processing completed successfully:",
     "processing_failed": "Processing failed: {ex}",
-    "invalid_bars_bpm": "Error: Bars and BPM must be integers. Example: generate Dynamic 32 125",
+    "invalid_bars_bpm": "Error: Bars and BPM must be integers. Example: generate 32 125 Energetic shuffle",
+    "invalid_drum_mode": "Error: Invalid drum mode: '{mode}'. Allowed modes: straight, break, shuffle",
     "generating_track": "Generating track ({takte} bars, {bpm} BPM, mood: {stimmung})...",
     "invalid_input": "Invalid input: {ex}",
     "generation_failed": "Track generation failed: {ex}",
@@ -142,6 +144,6 @@
       "slices": "Slices",
       "empty": "Empty"
     },
-    "help": "\n========================================================================\n                       OHRICUT - Help & Guide\n========================================================================\n\nOHRICUT is a tool for quickly creating beats and loops from your own\naudio material.\n\n1. GRAPHICAL USER INTERFACE (GUI)\n------------------------------------------------------------------------\nRun without arguments:\n  python3 ohricut_app.py\n\nThe interface is divided into three tabs:\n  - CUT:      Select WAV file, inspect silence & tempo,\n              slice to grid. The lower half displays all\n              slices with detailed properties.\n  - POOL:     Preview slices and manually move them into POOL folders.\n              Contains a detail view of all samples loaded into\n              the generator.\n  - GENERATE: Create beats from the approved POOL.\n              Output in GENERATED_MUSIC/.\n  - Settings (Drum Mode, Sidechain, Bass, Transitions, Variations) are located under GENERATE.\n\n2. COMMAND LINE (CLI)\n------------------------------------------------------------------------\n- Show help:\n    python3 ohricut_app.py help (or: hilfe, --help)\n\n- Process file (CUT step):\n    python3 ohricut_app.py process /path/to/file.wav (or: verarbeite)\n\n- Generate track (GENERATE step):\n    python3 ohricut_app.py generate <Mode> [bars] [bpm] [mood] (or: generiere)\n========================================================================\n"
+    "help": "\n========================================================================\n                       OHRICUT - Help & Guide\n========================================================================\n\nOHRICUT is a tool for quickly creating beats and loops from your own\naudio material.\n\n1. GRAPHICAL USER INTERFACE (GUI)\n------------------------------------------------------------------------\nRun without arguments:\n  python3 ohricut_app.py\n\nThe interface is divided into three tabs:\n  - CUT:      Select WAV file, inspect silence & tempo,\n              slice to grid. The lower half displays all\n              slices with detailed properties.\n  - POOL:     Preview slices and manually move them into POOL folders.\n              Contains a detail view of all samples loaded into\n              the generator.\n  - GENERATE: Create beats from the approved POOL.\n              Output in GENERATED_MUSIC/.\n  - Settings (Drum Mode, Sidechain, Bass, Transitions, Variations) are located under GENERATE.\n\n2. COMMAND LINE (CLI)\n------------------------------------------------------------------------\n- Show help:\n    python3 ohricut_app.py help (or: hilfe, --help)\n\n- Process file (CUT step):\n    python3 ohricut_app.py process /path/to/file.wav (or: verarbeite)\n\n- Generate track (GENERATE step):\n    python3 ohricut_app.py generate [bars] [bpm] [mood] [drum_mode] (or: generiere)\n========================================================================\n"
   }
 }

@@ -108,20 +108,20 @@ Processing saves the detected slices and analysis results in the `RESULTS/` fold
 ### Generate a track
 
 ```bash
-python ohricut_app.py generate Dynamic 32 125 Energetic
+python ohricut_app.py generate 32 125 Energetic shuffle
 ```
-*(Alternatively: `python ohricut_app.py generiere Dynamik 32 125 Energetisch`)*
+*(Alternatively: `python ohricut_app.py generiere 32 125 Energetisch shuffle`)*
 
 Arguments:
 
 | Argument | Description | Default |
 |---|---|---|
-| `mode` | Historical placeholder; not used by the current generator | – |
 | `bars` | Number of bars (8 to 256) | `32` |
 | `bpm` | Tempo (40 to 240 BPM) | `125` |
 | `mood` | Generator mood (`Energetic`/`Energetisch`, `Relaxed`/`Entspannt`, `Minimal`) | `Energetic` / `Energetisch` |
+| `drum_mode` | Optional drum mode (`straight`, `break`, `shuffle`) | Saved GUI setting |
 
-Generation uses the saved generator selection and the current settings. At least one usable drum sample must be selected. The generated WAV file is saved in `GENERATED_MUSIC/`.
+Generation uses the saved generator selection and the current settings. If `drum_mode` is omitted, the saved GUI setting is used. A specified drum mode applies only to that generation run without modifying saved settings. At least one usable drum sample must be selected. The generated WAV file is saved in `GENERATED_MUSIC/`.
 
 > Note: CLI generation uses the existing pool selection. Simply placing WAV files in the pool does not automatically make those samples available to the generator.
 
