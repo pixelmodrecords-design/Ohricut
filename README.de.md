@@ -108,20 +108,20 @@ Die Verarbeitung legt die erkannten Slices und Analyseergebnisse im Ordner `RESU
 ### Track generieren
 
 ```bash
-python ohricut_app.py generate Dynamic 32 125 Energetic
+python ohricut_app.py generate 32 125 Energetic shuffle
 ```
-*(Alternativ: `python ohricut_app.py generiere Dynamik 32 125 Energetisch`)*
+*(Alternativ: `python ohricut_app.py generiere 32 125 Energetisch shuffle`)*
 
 Argumente:
 
 | Argument | Bedeutung | Standard |
 |---|---|---|
-| `Modus` / `Mode` | Historischer Platzhalter; wird vom aktuellen Generator nicht ausgewertet | – |
 | `takte` / `bars` | Anzahl der Takte (8 bis 256) | `32` |
 | `bpm` | Tempo (40 bis 240 BPM) | `125` |
 | `stimmung` / `mood` | Generator-Stimmung (`Energetic`/`Energetisch`, `Relaxed`/`Entspannt`, `Minimal`) | `Energetic` / `Energetisch` |
+| `drum_mode` | Optionaler Drum-Modus (`straight`, `break`, `shuffle`) | Gespeicherte GUI-Einstellung |
 
-Die Generierung verwendet die gespeicherte Generator-Auswahl und die vorhandenen Einstellungen. Mindestens ein verwendbares Drum-Sample muss ausgewählt sein. Die erzeugte WAV-Datei wird in `GENERATED_MUSIC/` gespeichert.
+Die Generierung verwendet die gespeicherte Generator-Auswahl und die vorhandenen Einstellungen. Ohne Drum-Modus wird die gespeicherte GUI-Einstellung verwendet. Ein angegebener Drum-Modus gilt nur für diesen Generierungslauf und verändert gespeicherte Einstellungen nicht. Mindestens ein verwendbares Drum-Sample muss ausgewählt sein. Die erzeugte WAV-Datei wird in `GENERATED_MUSIC/` gespeichert.
 
 > Hinweis: Die CLI-Generierung verwendet die bestehende Pool-Auswahl. Das bloße Ablegen von WAV-Dateien im Pool bedeutet nicht automatisch, dass diese Samples für den Generator ausgewählt sind.
 

@@ -462,10 +462,6 @@ def setze_ziel_aus_tonart(t):
     return True
 
 
-def melodien_auf_ziel(mel, ziel):
-    """Grundton und Dur/Moll wirken nicht mehr auf die Melodie. Die Regler unten übernehmen das."""
-    return list(mel)
-
 def zufall(rnd, liste):
     if not liste:
         return None
@@ -672,7 +668,7 @@ def _sequenz(pools, rnd, einst, takte, bpm, stimmung, opt):
     grund = grundnote_hz(ziel)
     moll = ist_moll(ziel)
     skala = SKALA_MOLL if moll else SKALA_DUR
-    mel = melodien_auf_ziel(pools["MELODY"], ziel)
+    mel = list(pools["MELODY"])
     plaetze = {}
     for kat in DRUM_KATS:
         belegt = (list(pools[kat]) + [None] * DRUM_PLAETZE)[:DRUM_PLAETZE]
@@ -695,7 +691,7 @@ def _sequenz(pools, rnd, einst, takte, bpm, stimmung, opt):
         kern.lege_ab(rhy, x, p, GAIN["TRANS"])
 
     dv = DRUM_VARIATION.get(stimmung, DRUM_VARIATION["Energetisch"])
-    modus = einst.get("drum_modus", "break")
+    modus = opt.get("drum_modus") or einst.get("drum_modus", "break")
     dm = DRUM_MODI.get(modus, DRUM_MODI["break"])
     kick_base = MINIMAL_KICK if minimal else dm["kick"]
     open_base = dm["open_entspannt"] if stimmung == "Entspannt" else dm["open"]
@@ -916,6 +912,9 @@ def generiere_track(bpm=125, takte=32, stimmung="Entspannt", optionen=None):
 
     opt = dict(STANDARD_OPTIONEN)
     opt.update(optionen or {})
+    if "drum_modus" in opt and opt["drum_modus"] is not None:
+        if opt["drum_modus"] not in DRUM_MODI:
+            raise ValueError(i18n.t("logic.invalid_drum_mode", mode=opt["drum_modus"]))
     einst = lade_einstellungen()
     pools = lade_auswahl_pools(bpm)
     if not hat_drum_sample(pools):

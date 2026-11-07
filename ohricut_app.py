@@ -1044,19 +1044,26 @@ if __name__ == "__main__":
             sys.exit(1)
 
     elif args[0] in ("generate", "generiere"):
-        # args[1] (Modus) wird nicht mehr ausgewertet, der Generator kennt keine Modi mehr.
         try:
-            takte = int(args[2]) if len(args) > 2 else 32
-            bpm = int(args[3]) if len(args) > 3 else 125
+            takte = int(args[1]) if len(args) > 1 else 32
+            bpm = int(args[2]) if len(args) > 2 else 125
         except ValueError:
             print(i18n.t("cli.invalid_bars_bpm"))
             sys.exit(1)
-        stimmung = args[4] if len(args) > 4 else "Energetisch"
+        stimmung = args[3] if len(args) > 3 else "Energetisch"
+        drum_mode = args[4].lower() if len(args) > 4 else None
+
+        optionen = {}
+        if drum_mode is not None:
+            if drum_mode not in logik.DRUM_MODI:
+                print(i18n.t("cli.invalid_drum_mode", mode=drum_mode))
+                sys.exit(1)
+            optionen["drum_modus"] = drum_mode
 
         stimmung_anzeige = i18n.t(f"ui.generate.mood_names.{stimmung}", stimmung)
         print(i18n.t("cli.generating_track", takte=takte, bpm=bpm, stimmung=stimmung_anzeige))
         try:
-            pfad = logik.generiere_track(bpm=bpm, takte=takte, stimmung=stimmung)
+            pfad = logik.generiere_track(bpm=bpm, takte=takte, stimmung=stimmung, optionen=optionen)
         except ValueError as ex:
             print(f"{i18n.t('cli.invalid_input', ex=ex)}")
             sys.exit(1)
